@@ -9,6 +9,7 @@ const ui = new UI(document.getElementById("canvas"), state);
 const scoreEl = document.getElementById("score");
 const overlayEl = document.getElementById("overlay");
 const rulesEl = document.getElementById("rules");
+const versionEl = document.getElementById("version");
 
 /* ----- game-runtime vars ----- */
 let agentNode = state.layers[0][0];
