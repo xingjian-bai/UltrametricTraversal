@@ -39,9 +39,10 @@ function attachClickHandlers() {
 
       setTimeout(() => {
         ui.render(currentLayer, agentNode);
+        + attachClickHandlers();   // <-- re-bind listeners
         isBusy = false;
         if (currentLayer === config.DEPTH + 1) endGame();
-      }, config.HIGHLIGHT_MS + 100);
+        }, config.HIGHLIGHT_MS + 100);
     });
 }
 
