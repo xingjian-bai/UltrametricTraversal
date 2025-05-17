@@ -20,6 +20,7 @@ let isBusy = false;
 writeRules();
 ui.render(currentLayer, agentNode);
 attachClickHandlers();
+versionEl.textContent = `Version ${config.VERSION}`;
 
 /* ---------- functions ---------- */
 function attachClickHandlers() {

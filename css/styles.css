@@ -83,3 +83,10 @@ body {
 .button:active {
     transform: scale(0.98);
 }
+
+/* css/styles.css  – append anywhere */
+.version-banner {
+    margin-top: 4px;
+    font-size: 0.8em;
+    color: #666;
+}
