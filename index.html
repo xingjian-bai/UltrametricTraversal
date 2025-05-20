@@ -10,37 +10,141 @@
 </head>
 
 <body>
-  <!-- ----- rules & controls ----- -->
+  <!-- ───── Rules & Controls ───── -->
   <div id="rules" class="rules-container"></div>
 
   <div class="controls">
     <label>
-      Depth 
-      <input id="depthSlider" type="range" min="4" max="25" value="15" />
-      <span id="depthVal">15</span>
+      Depth
+      <input id="depthSlider" type="range" min="4" max="25" value="10" />
+      <span id="depthVal">10</span>
     </label>
 
     <label>
-      Width 
+      Width
       <input id="widthSlider" type="range" min="2" max="12" value="5" />
       <span id="widthVal">5</span>
     </label>
 
     <button id="generateBtn" class="button">Generate</button>
+    <button id="restartBtn" class="button">Restart</button>
   </div>
 
-  <!-- ----- SVG canvas ----- -->
+  <!-- ───── Canvas ───── -->
   <div class="svg-wrapper">
     <svg id="canvas" width="1000" height="800" class="svg-container"></svg>
-    <div id="overlay" class="overlay"></div>
+    <div id="overlay" class="overlay">
+      <div class="overlay-content">
+        <h2>All layers reached!</h2>
+        <p class="final-cost">Total cost: <span id="final-cost">0</span></p>
+        
+        <!-- Username submission form -->
+        <div id="score-submission" class="score-submission">
+          <p>Submit your score to the leaderboard:</p>
+          <input type="text" id="username-input" placeholder="Your name (optional)" maxlength="20">
+          <button id="submit-score" class="button">Submit Score</button>
+          <p id="submission-message"></p>
+        </div>
+        
+        <button id="restart-btn" class="button">Play Again</button>
+        <button id="show-leaderboard-btn" class="button">View Leaderboard</button>
+      </div>
+    </div>
+    
+    <!-- Game Legend -->
+    <div class="game-legend">
+      <h3>Legend</h3>
+      <div class="legend-item">
+        <div class="legend-color" style="background-color: #f57c00;"></div>
+        <div class="legend-text">Current Position</div>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color" style="background-color: #1976d2;"></div>
+        <div class="legend-text">Available Nodes</div>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color" style="background-color: #9575cd;"></div>
+        <div class="legend-text">Observed Nodes</div>
+      </div>
+      <div class="legend-item">
+        <div class="legend-line-only" style="background-color: #78909c;"></div>
+        <div class="legend-text">Tree Connections</div>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color-path" style="background-color: #d32f2f;"></div>
+        <div class="legend-text">Travel Path</div>
+      </div>
+    </div>
+
+    <!-- Game Stats Panel -->
+    <div class="game-stats-panel">
+      <div class="stat-box">
+        <div class="stat-label">Current Depth</div>
+        <div id="current-depth" class="stat-value">0</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Total Cost</div>
+        <div id="game-cost" class="stat-value">0</div>
+      </div>
+      <div class="move-history">
+        <div class="history-label">Move History</div>
+        <ul id="cost-history" class="cost-list"></ul>
+      </div>
+    </div>
   </div>
 
-  <!-- ----- HUD ----- -->
-  <p>Score: <span id="score">0</span></p>
+  <!-- ───── HUD ───── -->
+  <p style="display: none;">Cost: <span id="cost">0</span></p>
   <p id="version" class="version-banner"></p>
   <pre id="debug" class="debug-panel"></pre>
 
-  <!-- ----- main JS bundle ----- -->
+  <!-- ───── Version History ───── -->
+  <div id="versionHistory" class="version-log"></div>
+
+  <!-- Firebase SDK (Add before your main script) -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+  <!-- Firebase Config - Replace with your values -->
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDdR9vs-H4U4dMQSqLbHgcum5kHkimV5qk",
+      authDomain: "ultrametricleaderboard.firebaseapp.com",
+      projectId: "ultrametricleaderboard",
+      storageBucket: "ultrametricleaderboard.firebasestorage.app",
+      messagingSenderId: "932437470700",
+      appId: "1:932437470700:web:78000109387871b6b8a4c9",
+    };
+    
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+  </script>
+
+  <!-- ───── Main JS Bundle ───── -->
   <script type="module" src="js/game.js"></script>
+
+  <!-- Leaderboard Modal -->
+  <div id="leaderboard-modal" class="modal">
+    <div class="modal-content">
+      <span class="close-modal">&times;</span>
+      <h2>Leaderboard</h2>
+      <table id="leaderboard-table">
+        <thead>
+          <tr>
+            <th>Rank</th>
+            <th>Name</th>
+            <th>Score</th>
+            <th>Depth</th>
+            <th>Width</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody id="leaderboard-body">
+          <!-- Leaderboard entries will be inserted here -->
+        </tbody>
+      </table>
+    </div>
+  </div>
 </body>
 </html>

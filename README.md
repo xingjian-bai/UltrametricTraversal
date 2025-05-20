@@ -1,5 +1,20 @@
-# UltrametricTraversal
+# Ultrametric Traversal
 
+A graph traversal game demonstrating ultrametric space navigation through a randomized tree structure.
+
+## Key Features
+
+- **Tree Generation**: Random trees with configurable depth and width
+- **Traversal Mechanics**: Navigate by clicking nodes at increasing depths
+- **Cost Calculation**: Cost based on path length through least common ancestor
+- **Interactive UI**: Visual highlights of traversal paths
+- **Statistics Panel**: Track current depth, cost, and move history
+
+## Next Features
+
+- **Vertical Layer Axis**: Depth indicators with grid lines
+- **Baseline Comparisons**: Compare performance against algorithms like DFS
+- **Improved Statistics**: Visual analytics of player performance
 
 ## 🚧 TODO — Next-Round Feature Roadmap
 
@@ -21,9 +36,9 @@
   - Axis updates automatically when a new tree is generated or if `DEPTH` is changed.
 
 - [ ] **Baseline comparison panel**
-  - After the overlay shows “Game Over”, enable a **Compare with Baselines** button.  
+  - After the overlay shows "Game Over", enable a **Compare with Baselines** button.  
   - Implement **deterministic DFS** as the first baseline (future-proof for Random, Entropy-max, etc.).  
-  - Re-run the exact same random tree (same node/edge IDs) under the baseline policy and record its total score.  
+  - Re-run the exact same random tree (same node/edge IDs) under the baseline policy and record its total cost.  
   - Display a mini bar-chart (D3) inside the overlay comparing:  
-    *Your score* vs *DFS score* (and future baselines).  
-  - Tooltips show the raw edge-count; colours follow the game’s palette.
+    *Your cost* vs *DFS cost* (and future baselines).  
+  - Tooltips show the raw edge-count; colours follow the game's palette.
