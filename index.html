@@ -42,17 +42,20 @@
         <h2>All layers reached!</h2>
         <p class="final-cost">Total cost: <span id="final-cost">0</span></p>
         <p class="final-score">Relative score: <span id="final-score">0</span></p>
+        <p id="final-score-details" class="final-score-details">Depth: <span class="depth-value">0</span>, Width: <span class="width-value">0</span></p>
         
         <!-- Username submission form -->
         <div id="score-submission" class="score-submission">
-          <p>Submit your score to the leaderboard:</p>
-          <input type="text" id="username-input" placeholder="Your name (optional)" maxlength="20">
+          <input type="text" id="username-input" placeholder="Enter your name" maxlength="20">
           <button id="submit-score" class="button">Submit Score</button>
-          <p id="submission-message"></p>
+          <div id="submission-message"></div>
         </div>
         
-        <button id="restart-btn" class="button">Play Again</button>
-        <button id="show-leaderboard-btn" class="button">View Leaderboard</button>
+        <!-- Only keep these two buttons -->
+        <div class="button-container">
+          <button id="restart-btn" class="button">Play Again</button>
+          <button id="new-game-btn" class="button">New Game</button>
+        </div>
       </div>
     </div>
     
@@ -103,14 +106,14 @@
       <div class="filter-controls">
         <label>
           Depth:
-          <input id="leaderboardDepthSlider" type="range" min="4" max="25" value="10" />
-          <span id="leaderboardDepthVal">10</span>
+          <input id="leaderboardDepthSlider" type="range" min="4" max="25" value="12" />
+          <span id="leaderboardDepthVal">12</span>
         </label>
         
         <label>
           Width:
-          <input id="leaderboardWidthSlider" type="range" min="2" max="12" value="6" />
-          <span id="leaderboardWidthVal">6</span>
+          <input id="leaderboardWidthSlider" type="range" min="2" max="12" value="5" />
+          <span id="leaderboardWidthVal">5</span>
         </label>
         
         <button id="filter-leaderboard" class="button">Find Leaderboard</button>
@@ -124,7 +127,6 @@
         Score Formula: <strong>Cost ÷ Depth ÷ log(Width)</strong> (lower is better)
       </div>
       <div class="leaderboard-controls">
-        <button id="refresh-leaderboard" class="button">Refresh</button>
         <span id="last-updated">Last updated: Never</span>
       </div>
       <div class="leaderboard-container">
@@ -223,5 +225,11 @@
       </table>
     </div>
   </div>
+
+  <!-- Add at the bottom of the page -->
+  <footer class="site-footer">
+    <p>Ultrametric Traversal — Developed by Romain Cosson and Xingjian Bai</p>
+    <p class="copyright">© 2023</p>
+  </footer>
 </body>
 </html>

@@ -8,8 +8,11 @@ export class Leaderboard {
     this.gameConfig = gameConfig;
     this.leaderboardCollection = this.db.collection('leaderboard');
     this.refreshInterval = null;
-    this.currentFilterDepth = 10;
-    this.currentFilterWidth = 6;
+    
+    // Change default filter values to depth=12, width=5
+    this.currentFilterDepth = 12;
+    this.currentFilterWidth = 5;
+    
     this.setupEventListeners();
     
     // Load leaderboard immediately on page load
@@ -25,49 +28,39 @@ export class Leaderboard {
       this.submitScore();
     });
 
-    // Show leaderboard button
-    document.getElementById('show-leaderboard-btn').addEventListener('click', () => {
-      this.openLeaderboard();
-    });
-
-    // Close modal button
     document.querySelector('.close-modal').addEventListener('click', () => {
       document.getElementById('leaderboard-modal').style.display = 'none';
     });
 
-    // Click outside to close
     window.addEventListener('click', (e) => {
       if (e.target === document.getElementById('leaderboard-modal')) {
         document.getElementById('leaderboard-modal').style.display = 'none';
       }
     });
     
-    // Refresh live leaderboard button
-    document.getElementById('refresh-leaderboard').addEventListener('click', () => {
-      this.loadLiveLeaderboard();
-    });
-    
-    // New filter event listeners
-    const leaderboardDepthSlider = document.getElementById('leaderboardDepthSlider');
-    const leaderboardWidthSlider = document.getElementById('leaderboardWidthSlider');
-    
-    leaderboardDepthSlider.addEventListener('input', () => {
-      document.getElementById('leaderboardDepthVal').textContent = leaderboardDepthSlider.value;
-    });
-    
-    leaderboardWidthSlider.addEventListener('input', () => {
-      document.getElementById('leaderboardWidthVal').textContent = leaderboardWidthSlider.value;
-    });
-    
+    // Setup leaderboard filter controls
     document.getElementById('filter-leaderboard').addEventListener('click', () => {
-      this.currentFilterDepth = parseInt(leaderboardDepthSlider.value);
-      this.currentFilterWidth = parseInt(leaderboardWidthSlider.value);
-      this.loadLiveLeaderboard();
+      const depth = parseInt(document.getElementById('leaderboardDepthSlider').value);
+      const width = parseInt(document.getElementById('leaderboardWidthSlider').value);
       
-      // Also update the modal leaderboard if it's open
-      if (document.getElementById('leaderboard-modal').style.display === 'block') {
-        this.loadLeaderboard();
-      }
+      this.currentFilterDepth = depth;
+      this.currentFilterWidth = width;
+      
+      // Update the UI
+      document.getElementById('leaderboardDepthVal').textContent = depth;
+      document.getElementById('leaderboardWidthVal').textContent = width;
+      
+      // Load the filtered leaderboard
+      this.loadLiveLeaderboard();
+    });
+
+    // Setup sliders to update their value displays
+    document.getElementById('leaderboardDepthSlider').addEventListener('input', (e) => {
+      document.getElementById('leaderboardDepthVal').textContent = e.target.value;
+    });
+    
+    document.getElementById('leaderboardWidthSlider').addEventListener('input', (e) => {
+      document.getElementById('leaderboardWidthVal').textContent = e.target.value;
     });
   }
 
@@ -98,13 +91,40 @@ export class Leaderboard {
     const submitBtn = document.getElementById('submit-score');
     const messageEl = document.getElementById('submission-message');
     
-    // IMPORTANT FIX: Get the CURRENT depth and width values, not from initial config
+    // CRITICAL FIX: Double-check that we're using the current values
+    // Get these directly from the CONFIG object, DOM, and game state
     const cost = parseInt(document.getElementById('final-cost').textContent);
     
-    // Get depth and width from the current game configuration
-    // NOT from the stored this.gameConfig which might be outdated
-    const depth = parseInt(document.getElementById('depthVal').textContent);
-    const width = parseInt(document.getElementById('widthVal').textContent);
+    // Get current values from multiple sources to ensure correctness
+    let depth, width;
+    
+    // Try to get from final score display which shows actual game values
+    const scoreText = document.getElementById('final-score-details');
+    if (scoreText && scoreText.textContent) {
+      const match = scoreText.textContent.match(/Depth: (\d+), Width: (\d+)/);
+      if (match) {
+        depth = parseInt(match[1]);
+        width = parseInt(match[2]);
+      }
+    }
+    
+    // Fallback to slider values if the above failed
+    if (!depth || !width) {
+      depth = parseInt(document.getElementById('depthVal').textContent);
+      width = parseInt(document.getElementById('widthVal').textContent);
+    }
+    
+    // Final fallback to CONFIG if it exists globally
+    if ((!depth || !width) && window.CONFIG) {
+      depth = window.CONFIG.DEPTH;
+      width = window.CONFIG.WIDTH;
+    }
+    
+    // Ensure we have valid numbers
+    depth = depth || this.gameConfig.DEPTH || 12;
+    width = width || this.gameConfig.WIDTH || 5;
+    
+    console.log(`Submitting score with depth=${depth}, width=${width}`); // Debugging
     
     // Calculate relative score
     const relativeScore = this.calculateRelativeScore(cost, depth, width);

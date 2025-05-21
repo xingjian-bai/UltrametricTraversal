@@ -46,6 +46,8 @@ appendDebug("Ready – set parameters and click Generate.");
 
 /* ========================================================== */
 function startNewGame(W, D) {
+  updateConfig();
+    
   if (playing) return;
   playing = true;
 
@@ -72,9 +74,9 @@ function startNewGame(W, D) {
   document.getElementById("depthDisplay").textContent = D;
 
   // Initialize stat displays
-  currentDepthEl.textContent = "0";
-  gameCostEl.textContent = "0";
-  costHistoryEl.innerHTML = "";
+  if (currentDepthEl) currentDepthEl.textContent = "0";
+  if (gameCostEl) gameCostEl.textContent = "0";
+  if (costHistoryEl) costHistoryEl.innerHTML = "";
   moveNumber = 0;
 
   // Add this to update the leaderboard with current config:
@@ -112,7 +114,7 @@ function attachClickHandlers() {
     currentLayer++;
     
     // Update current depth display
-    currentDepthEl.textContent = currentLayer - 1;
+    if (currentDepthEl) currentDepthEl.textContent = currentLayer - 1;
 
     setTimeout(() => {
       ui.render(currentLayer, agentNode);
@@ -120,7 +122,7 @@ function attachClickHandlers() {
       busy = false;
 
       if (currentLayer === state.depth + 1) endGame();
-    }, config.HIGHLIGHT_MS + 50);
+    }, 500);
   });
 }
 
@@ -140,6 +142,14 @@ function endGame() {
   const finalScoreEl = document.getElementById('final-score');
   if (finalScoreEl) {
     finalScoreEl.textContent = relativeScore;
+  }
+  
+  // Update depth and width values in the final score details
+  const depthValueEl = document.querySelector('.depth-value');
+  const widthValueEl = document.querySelector('.width-value');
+  if (depthValueEl && widthValueEl) {
+    depthValueEl.textContent = currentDepth;
+    widthValueEl.textContent = currentWidth;
   }
   
   // Update leaderboard filters to match current game
@@ -164,6 +174,18 @@ function endGame() {
     restartGame();
   };
   
+  // NEW: Add click handler to make clicking outside the overlay restart the game
+  const overlay = document.getElementById('overlay');
+  const overlayContent = document.querySelector('.overlay-content');
+  
+  overlay.addEventListener('click', (event) => {
+    // Check if the click is on the overlay but not on the overlay content
+    if (event.target === overlay && !overlayContent.contains(event.target)) {
+      overlay.style.display = "none";
+      restartGame();
+    }
+  });
+  
   // Re-enable controls
   genBtn.disabled = false;
   depthSlider.disabled = false;
@@ -183,7 +205,6 @@ function updateRules() {
     
     <p>In a tree, every pair of nodes has a unique common ancestor. The path between two nodes goes up to this common ancestor, then down to the destination. Careful planning of your moves will help minimize your total cost.</p>
     
-    <div id="depthNote">Current tree depth: <span id="depthDisplay">15</span></div>
     
     <div class="score-explanation">
       <h3>Leaderboard Score</h3>
@@ -213,6 +234,8 @@ function renderVersionLog() {
 restartBtn.addEventListener("click", restartGame);
 
 function restartGame() {
+  updateConfig();
+    
   playing = false;
   agentNode = null;
   currentLayer = 0;
@@ -238,12 +261,40 @@ function restartGame() {
   
   // Reset display values
   costEl.textContent = "0";
-  currentDepthEl.textContent = "0";
-  gameCostEl.textContent = "0";
-  costHistoryEl.innerHTML = "";
+  if (currentDepthEl) currentDepthEl.textContent = "0";
+  if (gameCostEl) gameCostEl.textContent = "0";
+  if (costHistoryEl) costHistoryEl.innerHTML = "";
   moveNumber = 0;
   
   // Clear and update debug
   debugEl.textContent = "";
   appendDebug("Game restarted. Click 'Generate' to start a new game.");
 }
+
+// Additional fix for the restart bug to ensure correct depth/width are saved
+let CONFIG = {
+  WIDTH: 5,
+  DEPTH: 12
+};
+
+function updateConfig() {
+  // Update the CONFIG object whenever sliders change
+  CONFIG.DEPTH = parseInt(document.getElementById('depthSlider').value);
+  CONFIG.WIDTH = parseInt(document.getElementById('widthSlider').value);
+  
+  // Update display elements
+  document.getElementById('depthVal').textContent = CONFIG.DEPTH;
+  document.getElementById('widthVal').textContent = CONFIG.WIDTH;
+  
+  // Make sure leaderboard knows the current values
+  if (window.leaderboard) {
+    window.leaderboard.updateGameConfig({
+      DEPTH: CONFIG.DEPTH,
+      WIDTH: CONFIG.WIDTH
+    });
+  }
+}
+
+// Add event listeners for slider changes
+document.getElementById('depthSlider').addEventListener('input', updateConfig);
+document.getElementById('widthSlider').addEventListener('input', updateConfig);
