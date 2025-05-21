@@ -141,7 +141,7 @@ function endGame() {
   const currentWidth = parseInt(document.getElementById('widthVal').textContent);
   
   // Calculate and display the relative score with CURRENT depth/width
-  const relativeScore = (cost / currentDepth / Math.log(currentWidth)).toFixed(2);
+  const relativeScore = (cost / currentDepth).toFixed(2);
   const finalScoreEl = document.getElementById('final-score');
   if (finalScoreEl) {
     finalScoreEl.textContent = relativeScore;
@@ -211,7 +211,7 @@ function updateRules() {
     
     <div class="score-explanation">
       <h3>Leaderboard Score</h3>
-      <p>Your leaderboard score is calculated as: <strong>Cost ÷ Depth ÷ log(Width)</strong></p>
+      <p>Your leaderboard score is calculated as: <strong>Cost ÷ Depth</strong></p>
       <p>Lower scores are better! This formula allows fair comparison between games with different depths and widths.</p>
     </div>
   `;

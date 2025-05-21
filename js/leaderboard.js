@@ -88,7 +88,7 @@ export class Leaderboard {
   }
 
   calculateRelativeScore(cost, depth, width) {
-    return (cost / depth / Math.log(width)).toFixed(2);
+    return (cost / depth).toFixed(2);
   }
 
   async submitScore() {
@@ -204,22 +204,29 @@ export class Leaderboard {
   
   async loadLiveLeaderboard(showAll = false) {
     try {
+      console.log("Starting to load leaderboard...", { showAll, depth: this.currentFilterDepth, width: this.currentFilterWidth });
+      
       const lastUpdatedEl = document.getElementById('last-updated');
       const leaderboardBody = document.getElementById('leaderboard-live-body');
       
-      if (leaderboardBody) {
-        leaderboardBody.innerHTML = '<tr><td colspan="7">Loading...</td></tr>';
+      if (!leaderboardBody) {
+        console.error("Couldn't find leaderboard-live-body element");
+        return;
       }
+      
+      leaderboardBody.innerHTML = '<tr><td colspan="7">Loading...</td></tr>';
       
       let query;
       
       if (showAll) {
         // Show all results sorted by relativeScore
+        console.log("Loading ALL results");
         query = this.leaderboardCollection
           .orderBy('relativeScore', 'asc')
           .limit(100);
       } else {
         // Filter by depth and width
+        console.log(`Loading filtered results: depth=${this.currentFilterDepth}, width=${this.currentFilterWidth}`);
         query = this.leaderboardCollection
           .where('depth', '==', this.currentFilterDepth)
           .where('width', '==', this.currentFilterWidth)
@@ -227,13 +234,20 @@ export class Leaderboard {
           .limit(100);
       }
       
+      console.log("Query created, fetching data...");
       const snapshot = await query.get();
+      console.log(`Data received: ${snapshot.size} records`);
       
       // Update the UI with the results
       this.updateLeaderboardUI(snapshot, leaderboardBody, lastUpdatedEl, showAll);
       
     } catch (error) {
       console.error('Error loading leaderboard:', error);
+      // Show the error in the table too
+      const leaderboardBody = document.getElementById('leaderboard-live-body');
+      if (leaderboardBody) {
+        leaderboardBody.innerHTML = `<tr><td colspan="7">Error loading leaderboard: ${error.message}</td></tr>`;
+      }
     }
   }
   
@@ -301,15 +315,27 @@ export class Leaderboard {
 
   // Helper method to update the leaderboard UI
   updateLeaderboardUI(snapshot, leaderboardBody, lastUpdatedEl, showAll) {
-    if (leaderboardBody) {
-      if (snapshot.empty) {
-        leaderboardBody.innerHTML = '<tr><td colspan="7">No scores found for this configuration</td></tr>';
-      } else {
-        leaderboardBody.innerHTML = '';
-        let rank = 1;
-        
-        snapshot.forEach(doc => {
+    console.log("Updating leaderboard UI");
+    
+    if (!leaderboardBody) {
+      console.error("leaderboardBody element is null in updateLeaderboardUI");
+      return;
+    }
+    
+    if (snapshot.empty) {
+      console.log("No matching records found");
+      leaderboardBody.innerHTML = '<tr><td colspan="7">No scores found for this configuration</td></tr>';
+      
+    } else {
+      console.log(`Processing ${snapshot.size} records`);
+      leaderboardBody.innerHTML = '';
+      let rank = 1;
+      
+      snapshot.forEach(doc => {
+        try {
           const data = doc.data();
+          console.log(`Processing record: ${data.username}, score: ${data.relativeScore}`);
+          
           const date = data.dateSubmitted ? data.dateSubmitted.toDate() : new Date();
           const formattedDate = date.toLocaleDateString();
           
@@ -326,8 +352,10 @@ export class Leaderboard {
           
           leaderboardBody.appendChild(row);
           rank++;
-        });
-      }
+        } catch (err) {
+          console.error("Error processing leaderboard row:", err, doc.data());
+        }
+      });
     }
     
     if (lastUpdatedEl) {
@@ -343,6 +371,8 @@ export class Leaderboard {
         leaderboardTitle.textContent = `Leaderboard (Depth: ${this.currentFilterDepth}, Width: ${this.currentFilterWidth})`;
       }
     }
+    
+    console.log("Leaderboard UI update complete");
   }
 }
 
