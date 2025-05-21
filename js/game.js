@@ -123,8 +123,17 @@ function endGame() {
   // Set final cost in overlay
   document.getElementById("final-cost").textContent = cost;
   
-  // Auto-fill username from previous submissions if available
-  window.leaderboard.autoFillUsername();
+  // Calculate and display the relative score
+  const relativeScore = (cost / config.DEPTH / Math.log(config.WIDTH)).toFixed(2);
+  const finalScoreEl = document.getElementById('final-score');
+  if (finalScoreEl) {
+    finalScoreEl.textContent = relativeScore;
+  }
+  
+  // Auto-fill username from localStorage if available
+  if (window.leaderboard) {
+    window.leaderboard.autoFillUsername();
+  }
   
   // Display the overlay
   const overlay = document.getElementById("overlay");

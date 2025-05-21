@@ -22,8 +22,8 @@
 
     <label>
       Width
-      <input id="widthSlider" type="range" min="2" max="12" value="5" />
-      <span id="widthVal">5</span>
+      <input id="widthSlider" type="range" min="2" max="12" value="6" />
+      <span id="widthVal">6</span>
     </label>
 
     <button id="generateBtn" class="button">Generate</button>
@@ -41,6 +41,7 @@
       <div class="overlay-content">
         <h2>All layers reached!</h2>
         <p class="final-cost">Total cost: <span id="final-cost">0</span></p>
+        <p class="final-score">Relative score: <span id="final-score">0</span></p>
         
         <!-- Username submission form -->
         <div id="score-submission" class="score-submission">
@@ -96,6 +97,26 @@
       </div>
     </div>
 
+    <!-- Add this before the leaderboard section -->
+    <div class="leaderboard-filters">
+      <h3>Filter Leaderboard</h3>
+      <div class="filter-controls">
+        <label>
+          Depth:
+          <input id="leaderboardDepthSlider" type="range" min="4" max="25" value="10" />
+          <span id="leaderboardDepthVal">10</span>
+        </label>
+        
+        <label>
+          Width:
+          <input id="leaderboardWidthSlider" type="range" min="2" max="12" value="6" />
+          <span id="leaderboardWidthVal">6</span>
+        </label>
+        
+        <button id="filter-leaderboard" class="button">Find Leaderboard</button>
+      </div>
+    </div>
+
     <!-- Add this after the svg-wrapper div -->
     <div class="leaderboard-section">
       <h2>Global Leaderboard</h2>
@@ -113,6 +134,7 @@
               <th>Rank</th>
               <th>Name</th>
               <th>Score</th>
+              <th>Cost</th>
               <th>Depth</th>
               <th>Width</th>
               <th>Date</th>
@@ -146,7 +168,7 @@
       apiKey: "AIzaSyDdR9vs-H4U4dMQSqLbHgcum5kHkimV5qk",
       authDomain: "ultrametricleaderboard.firebaseapp.com",
       projectId: "ultrametricleaderboard",
-      storageBucket: "ultrametricleaderboard.firebasestorage.app",
+      storageBucket: "ultrametricleaderboard.appspot.com",
       messagingSenderId: "932437470700",
       appId: "1:932437470700:web:78000109387871b6b8a4c9",
     };

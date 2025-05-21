@@ -8,6 +8,8 @@ export class Leaderboard {
     this.gameConfig = gameConfig;
     this.leaderboardCollection = this.db.collection('leaderboard');
     this.refreshInterval = null;
+    this.currentFilterDepth = 10;
+    this.currentFilterWidth = 6;
     this.setupEventListeners();
     
     // Load leaderboard immediately on page load
@@ -43,6 +45,29 @@ export class Leaderboard {
     // Refresh live leaderboard button
     document.getElementById('refresh-leaderboard').addEventListener('click', () => {
       this.loadLiveLeaderboard();
+    });
+    
+    // New filter event listeners
+    const leaderboardDepthSlider = document.getElementById('leaderboardDepthSlider');
+    const leaderboardWidthSlider = document.getElementById('leaderboardWidthSlider');
+    
+    leaderboardDepthSlider.addEventListener('input', () => {
+      document.getElementById('leaderboardDepthVal').textContent = leaderboardDepthSlider.value;
+    });
+    
+    leaderboardWidthSlider.addEventListener('input', () => {
+      document.getElementById('leaderboardWidthVal').textContent = leaderboardWidthSlider.value;
+    });
+    
+    document.getElementById('filter-leaderboard').addEventListener('click', () => {
+      this.currentFilterDepth = parseInt(leaderboardDepthSlider.value);
+      this.currentFilterWidth = parseInt(leaderboardWidthSlider.value);
+      this.loadLiveLeaderboard();
+      
+      // Also update the modal leaderboard if it's open
+      if (document.getElementById('leaderboard-modal').style.display === 'block') {
+        this.loadLeaderboard();
+      }
     });
   }
 
@@ -103,6 +128,16 @@ export class Leaderboard {
       // Store the username in localStorage for future submissions
       localStorage.setItem('ultrametricUsername', username);
       
+      // Set current filter to match the submitted score dimensions
+      this.currentFilterDepth = depth;
+      this.currentFilterWidth = width;
+      
+      // Update sliders to match current filters
+      document.getElementById('leaderboardDepthSlider').value = depth;
+      document.getElementById('leaderboardDepthVal').textContent = depth;
+      document.getElementById('leaderboardWidthSlider').value = width;
+      document.getElementById('leaderboardWidthVal').textContent = width;
+      
       // Refresh the live leaderboard
       this.loadLiveLeaderboard();
       
@@ -119,11 +154,13 @@ export class Leaderboard {
 
   async loadLeaderboard() {
     const tableBody = document.getElementById('leaderboard-body');
-    tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center">Loading leaderboard data...</td></tr>';
+    tableBody.innerHTML = '<tr><td colspan="7" style="text-align:center">Loading leaderboard data...</td></tr>';
     
     try {
-      // Get top 100 scores ordered by relative score (ascending = better)
+      // Get scores filtered by current dimensions
       const snapshot = await this.leaderboardCollection
+        .where('depth', '==', this.currentFilterDepth)
+        .where('width', '==', this.currentFilterWidth)
         .orderBy('relativeScore', 'asc')
         .limit(100)
         .get();
@@ -132,17 +169,19 @@ export class Leaderboard {
       
     } catch (error) {
       console.error('Error loading leaderboard:', error);
-      tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center">Error loading leaderboard data. Please try again.</td></tr>';
+      tableBody.innerHTML = '<tr><td colspan="7" style="text-align:center">Error loading leaderboard data. Please try again.</td></tr>';
     }
   }
   
   async loadLiveLeaderboard() {
     const tableBody = document.getElementById('live-leaderboard-body');
-    tableBody.innerHTML = '<tr><td colspan="6" class="loading-message">Loading leaderboard data...</td></tr>';
+    tableBody.innerHTML = '<tr><td colspan="7" class="loading-message">Loading leaderboard data...</td></tr>';
     
     try {
-      // Get top 100 scores ordered by relative score (ascending = better)
+      // Get scores filtered by current dimensions
       const snapshot = await this.leaderboardCollection
+        .where('depth', '==', this.currentFilterDepth)
+        .where('width', '==', this.currentFilterWidth)
         .orderBy('relativeScore', 'asc')
         .limit(100)
         .get();
@@ -154,15 +193,28 @@ export class Leaderboard {
       const timeString = now.toLocaleTimeString();
       document.getElementById('last-updated').textContent = `Last updated: ${timeString}`;
       
+      // Update dimension indicator
+      const dimensionIndicator = document.getElementById('dimension-indicator') || 
+        document.createElement('div');
+      dimensionIndicator.id = 'dimension-indicator';
+      dimensionIndicator.className = 'dimension-indicator';
+      dimensionIndicator.textContent = `Showing: Depth ${this.currentFilterDepth}, Width ${this.currentFilterWidth}`;
+      
+      const leaderboardControls = document.querySelector('.leaderboard-controls');
+      if (!document.getElementById('dimension-indicator')) {
+        leaderboardControls.appendChild(dimensionIndicator);
+      }
+      
     } catch (error) {
       console.error('Error loading live leaderboard:', error);
-      tableBody.innerHTML = '<tr><td colspan="6" class="loading-message">Error loading leaderboard data. Please try again.</td></tr>';
+      tableBody.innerHTML = '<tr><td colspan="7" class="loading-message">Error loading leaderboard data. Please try again.</td></tr>';
     }
   }
   
   populateLeaderboard(snapshot, tableBody) {
     if (snapshot.empty) {
-      tableBody.innerHTML = '<tr><td colspan="6" class="loading-message">No scores submitted yet!</td></tr>';
+      tableBody.innerHTML = '<tr><td colspan="7" class="loading-message">No scores for Depth ' + 
+        this.currentFilterDepth + ', Width ' + this.currentFilterWidth + ' yet!</td></tr>';
       return;
     }
     
@@ -191,6 +243,7 @@ export class Leaderboard {
         <td>${rank}</td>
         <td>${data.username}</td>
         <td>${data.relativeScore}</td>
+        <td>${data.cost}</td>
         <td>${data.depth}</td>
         <td>${data.width}</td>
         <td>${formattedDate}</td>

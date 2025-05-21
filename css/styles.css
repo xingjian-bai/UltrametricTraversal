@@ -532,3 +532,64 @@ body {
   border-radius: 4px;
   font-size: 15px;
 }
+
+/* Add styles for leaderboard filters */
+.leaderboard-filters {
+  width: 80%;
+  max-width: 800px;
+  margin: 20px auto;
+  padding: 15px;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.leaderboard-filters h3 {
+  margin-top: 0;
+  color: #333;
+  text-align: center;
+}
+
+.filter-controls {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 15px;
+  align-items: center;
+}
+
+.filter-controls label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.filter-controls input[type="range"] {
+  width: 120px;
+}
+
+#filter-leaderboard {
+  background: #1976d2;
+  color: white;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+#filter-leaderboard:hover {
+  background: #1565c0;
+}
+
+/* Style for final score */
+.final-score {
+  margin: 10px 0;
+  font-size: 18px;
+  color: #1976d2;
+  font-weight: bold;
+}
+
+#final-score {
+  color: #2e7d32;
+  font-size: 20px;
+}
