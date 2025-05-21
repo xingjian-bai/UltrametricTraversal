@@ -28,6 +28,10 @@
 
     <button id="generateBtn" class="button">Generate</button>
     <button id="restartBtn" class="button">Restart</button>
+    <!-- Add this somewhere visible for testing -->
+    <!-- <button onclick="testFirebaseConnection()" style="position: fixed; bottom: 10px; right: 10px; padding: 10px; z-index: 9999; background: #f0f0f0;">
+      Test Firebase
+    </button> -->
   </div>
 
   <!-- ───── Canvas ───── -->
@@ -147,13 +151,33 @@
       appId: "1:932437470700:web:78000109387871b6b8a4c9",
     };
     
-    // Initialize Firebase
+    // Initialize Firebase properly
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
+    
+    // // Add this diagnostic function
+    // function testFirebaseConnection() {
+    //   console.log("Testing Firebase connection...");
+      
+    //   db.collection('test_collection').add({
+    //     timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+    //     message: "Connection test"
+    //   })
+    //   .then(docRef => {
+    //     console.log("✅ Firebase connection successful! Document written with ID:", docRef.id);
+    //     alert("Firebase connection working! Document ID: " + docRef.id);
+    //   })
+    //   .catch(error => {
+    //     console.error("❌ Firebase connection error:", error);
+    //     alert("Firebase error: " + error.message);
+    //   });
+    // }
   </script>
 
   <!-- ───── Main JS Bundle ───── -->
   <script type="module" src="js/game.js"></script>
+
+
 
   <!-- Leaderboard Modal -->
   <div id="leaderboard-modal" class="modal">
