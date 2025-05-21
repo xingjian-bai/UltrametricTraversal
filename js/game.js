@@ -70,8 +70,11 @@ function startNewGame(W, D) {
   ui.render(currentLayer, agentNode);
   attachClickHandlers();
 
-  /* update depth note in rules panel */
-  document.getElementById("depthDisplay").textContent = D;
+  /* update depth note in rules panel - WITH NULL CHECK */
+  const depthDisplay = document.getElementById("depthDisplay");
+  if (depthDisplay) {
+    depthDisplay.textContent = D;
+  }
 
   // Initialize stat displays
   if (currentDepthEl) currentDepthEl.textContent = "0";
@@ -168,13 +171,13 @@ function endGame() {
   // Show the overlay
   document.getElementById('overlay').style.display = 'flex';
   
-  // Wire up the restart button in the overlay
-  document.getElementById("restart-btn").onclick = () => {
+  // Wire up the new game button in the overlay
+  document.getElementById("new-game-btn").onclick = () => {
     overlay.style.display = "none";
-    restartGame();
+    startNewGame(CONFIG.WIDTH, CONFIG.DEPTH);
   };
   
-  // NEW: Add click handler to make clicking outside the overlay restart the game
+  // NEW: Add click handler to make clicking outside the overlay start a new game
   const overlay = document.getElementById('overlay');
   const overlayContent = document.querySelector('.overlay-content');
   
@@ -182,7 +185,7 @@ function endGame() {
     // Check if the click is on the overlay but not on the overlay content
     if (event.target === overlay && !overlayContent.contains(event.target)) {
       overlay.style.display = "none";
-      restartGame();
+      startNewGame(CONFIG.WIDTH, CONFIG.DEPTH);
     }
   });
   

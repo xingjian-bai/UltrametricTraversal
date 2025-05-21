@@ -736,3 +736,97 @@ input[type="text"], input[type="number"] {
   border-top: 1px solid #eee;
   color: #666;
 }
+
+/* Larger elements for mobile devices */
+@media screen and (max-width: 768px) {
+  /* Larger font sizes */
+  body {
+    font-size: 20px; /* Increased base font size */
+  }
+  
+  h1 {
+    font-size: 3rem;
+  }
+  
+  h2 {
+    font-size: 2.4rem;
+  }
+  
+  h3 {
+    font-size: 2rem;
+  }
+  
+  /* Larger buttons */
+  .button {
+    padding: 16px 28px;
+    font-size: 22px;
+    min-width: 150px;
+    margin: 12px;
+    border-radius: 12px;
+  }
+  
+  /* Larger form inputs */
+  input[type="text"], input[type="number"] {
+    font-size: 20px;
+    padding: 14px 18px;
+    border-radius: 8px;
+    height: auto;
+  }
+  
+  /* Larger sliders */
+  input[type="range"] {
+    height: 30px;
+    margin: 15px 0;
+  }
+  
+  /* Larger game stats */
+  .stat-value {
+    font-size: 34px;
+    padding: 8px 0;
+  }
+  
+  .stat-label, .history-label {
+    font-size: 16px;
+  }
+  
+  /* Larger leaderboard text */
+  table th, table td {
+    font-size: 18px;
+    padding: 12px 18px;
+  }
+  
+  /* Larger score submission form */
+  .score-submission input {
+    font-size: 20px;
+    padding: 14px;
+    margin-bottom: 16px;
+  }
+  
+  /* Larger legend */
+  .legend-item {
+    font-size: 18px;
+    margin: 12px 0;
+  }
+  
+  .legend-color, .legend-color-path {
+    width: 26px;
+    height: 26px;
+    margin-right: 12px;
+  }
+  
+  /* Larger overlay content */
+  .overlay-content {
+    padding: 40px 50px;
+    max-width: 90%;
+  }
+  
+  .final-cost, .final-score {
+    font-size: 22px;
+  }
+  
+  #final-cost, #final-score {
+    font-size: 28px;
+  }
+}
+
+/* Add JavaScript to adjust D3 node sizes on mobile */

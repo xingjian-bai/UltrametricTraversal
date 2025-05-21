@@ -51,7 +51,13 @@ export class Leaderboard {
       document.getElementById('leaderboardWidthVal').textContent = width;
       
       // Load the filtered leaderboard
-      this.loadLiveLeaderboard();
+      this.loadLiveLeaderboard(false);
+    });
+
+    // NEW: Add event listener for the "All Results" button
+    document.getElementById('all-leaderboard').addEventListener('click', () => {
+      // Load all results
+      this.loadLiveLeaderboard(true);
     });
 
     // Setup sliders to update their value displays
@@ -196,41 +202,38 @@ export class Leaderboard {
     }
   }
   
-  async loadLiveLeaderboard() {
-    const tableBody = document.getElementById('live-leaderboard-body');
-    tableBody.innerHTML = '<tr><td colspan="7" class="loading-message">Loading leaderboard data...</td></tr>';
-    
+  async loadLiveLeaderboard(showAll = false) {
     try {
-      // Get scores filtered by current dimensions
-      const snapshot = await this.leaderboardCollection
-        .where('depth', '==', this.currentFilterDepth)
-        .where('width', '==', this.currentFilterWidth)
-        .orderBy('relativeScore', 'asc')
-        .limit(100)
-        .get();
+      const lastUpdatedEl = document.getElementById('last-updated');
+      const leaderboardBody = document.getElementById('leaderboard-live-body');
       
-      this.populateLeaderboard(snapshot, tableBody);
-      
-      // Update "last updated" timestamp
-      const now = new Date();
-      const timeString = now.toLocaleTimeString();
-      document.getElementById('last-updated').textContent = `Last updated: ${timeString}`;
-      
-      // Update dimension indicator
-      const dimensionIndicator = document.getElementById('dimension-indicator') || 
-        document.createElement('div');
-      dimensionIndicator.id = 'dimension-indicator';
-      dimensionIndicator.className = 'dimension-indicator';
-      dimensionIndicator.textContent = `Showing: Depth ${this.currentFilterDepth}, Width ${this.currentFilterWidth}`;
-      
-      const leaderboardControls = document.querySelector('.leaderboard-controls');
-      if (!document.getElementById('dimension-indicator')) {
-        leaderboardControls.appendChild(dimensionIndicator);
+      if (leaderboardBody) {
+        leaderboardBody.innerHTML = '<tr><td colspan="7">Loading...</td></tr>';
       }
       
+      let query;
+      
+      if (showAll) {
+        // Show all results sorted by relativeScore
+        query = this.leaderboardCollection
+          .orderBy('relativeScore', 'asc')
+          .limit(100);
+      } else {
+        // Filter by depth and width
+        query = this.leaderboardCollection
+          .where('depth', '==', this.currentFilterDepth)
+          .where('width', '==', this.currentFilterWidth)
+          .orderBy('relativeScore', 'asc')
+          .limit(100);
+      }
+      
+      const snapshot = await query.get();
+      
+      // Update the UI with the results
+      this.updateLeaderboardUI(snapshot, leaderboardBody, lastUpdatedEl, showAll);
+      
     } catch (error) {
-      console.error('Error loading live leaderboard:', error);
-      tableBody.innerHTML = '<tr><td colspan="7" class="loading-message">Error loading leaderboard data. Please try again.</td></tr>';
+      console.error('Error loading leaderboard:', error);
     }
   }
   
@@ -294,6 +297,52 @@ export class Leaderboard {
 
   updateGameConfig(newConfig) {
     this.gameConfig = newConfig;
+  }
+
+  // Helper method to update the leaderboard UI
+  updateLeaderboardUI(snapshot, leaderboardBody, lastUpdatedEl, showAll) {
+    if (leaderboardBody) {
+      if (snapshot.empty) {
+        leaderboardBody.innerHTML = '<tr><td colspan="7">No scores found for this configuration</td></tr>';
+      } else {
+        leaderboardBody.innerHTML = '';
+        let rank = 1;
+        
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          const date = data.dateSubmitted ? data.dateSubmitted.toDate() : new Date();
+          const formattedDate = date.toLocaleDateString();
+          
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${rank}</td>
+            <td>${data.username}</td>
+            <td>${data.relativeScore.toFixed(2)}</td>
+            <td>${data.cost}</td>
+            <td>${data.depth}</td>
+            <td>${data.width}</td>
+            <td>${formattedDate}</td>
+          `;
+          
+          leaderboardBody.appendChild(row);
+          rank++;
+        });
+      }
+    }
+    
+    if (lastUpdatedEl) {
+      lastUpdatedEl.textContent = 'Last updated: ' + new Date().toLocaleTimeString();
+    }
+    
+    // Update the leaderboard title to indicate if showing all results
+    const leaderboardTitle = document.querySelector('.leaderboard-section h2');
+    if (leaderboardTitle) {
+      if (showAll) {
+        leaderboardTitle.textContent = 'All-Time Best Scores (All Configurations)';
+      } else {
+        leaderboardTitle.textContent = `Leaderboard (Depth: ${this.currentFilterDepth}, Width: ${this.currentFilterWidth})`;
+      }
+    }
   }
 }
 

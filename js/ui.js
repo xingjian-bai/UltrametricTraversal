@@ -44,6 +44,17 @@ export class UI {
 
     this.nodeMap = new Map();
     this._layoutDone = false;
+
+    // Adjust node sizes for mobile
+    this.nodeSizeFactor = window.innerWidth <= 768 ? 2.0 : 1.0;
+    
+    // Recalculate on window resize
+    window.addEventListener('resize', () => {
+      this.nodeSizeFactor = window.innerWidth <= 768 ? 2.0 : 1.0;
+      if (this.state) {
+        this.render(this.currentLayer, this.currentNode);
+      }
+    });
   }
 
   render(visibleDepth = 0, agentNode = null) {
