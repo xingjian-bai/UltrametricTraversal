@@ -91,6 +91,37 @@
         <ul id="cost-history" class="cost-list"></ul>
       </div>
     </div>
+
+    <!-- Add this after the svg-wrapper div -->
+    <div class="leaderboard-section">
+      <h2>Global Leaderboard</h2>
+      <div class="score-formula-info">
+        Score Formula: <strong>Cost ÷ Depth ÷ log(Width)</strong> (lower is better)
+      </div>
+      <div class="leaderboard-controls">
+        <button id="refresh-leaderboard" class="button">Refresh</button>
+        <span id="last-updated">Last updated: Never</span>
+      </div>
+      <div class="leaderboard-container">
+        <table id="live-leaderboard">
+          <thead>
+            <tr>
+              <th>Rank</th>
+              <th>Name</th>
+              <th>Score</th>
+              <th>Depth</th>
+              <th>Width</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody id="live-leaderboard-body">
+            <tr>
+              <td colspan="6" class="loading-message">Loading leaderboard data...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
   </div>
 
   <!-- ───── HUD ───── -->

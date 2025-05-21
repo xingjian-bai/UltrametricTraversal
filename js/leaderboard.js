@@ -7,7 +7,14 @@ export class Leaderboard {
     this.db = firebase.firestore();
     this.gameConfig = gameConfig;
     this.leaderboardCollection = this.db.collection('leaderboard');
+    this.refreshInterval = null;
     this.setupEventListeners();
+    
+    // Load leaderboard immediately on page load
+    this.loadLiveLeaderboard();
+    
+    // Set up auto-refresh (every 2 minutes)
+    this.startAutoRefresh();
   }
 
   setupEventListeners() {
@@ -32,6 +39,23 @@ export class Leaderboard {
         document.getElementById('leaderboard-modal').style.display = 'none';
       }
     });
+    
+    // Refresh live leaderboard button
+    document.getElementById('refresh-leaderboard').addEventListener('click', () => {
+      this.loadLiveLeaderboard();
+    });
+  }
+
+  startAutoRefresh() {
+    // Clear any existing interval
+    if (this.refreshInterval) {
+      clearInterval(this.refreshInterval);
+    }
+    
+    // Refresh the leaderboard every 2 minutes
+    this.refreshInterval = setInterval(() => {
+      this.loadLiveLeaderboard();
+    }, 120000); // 2 minutes
   }
 
   openLeaderboard() {
@@ -60,6 +84,7 @@ export class Leaderboard {
     // Disable the button to prevent multiple submissions
     submitBtn.disabled = true;
     submitBtn.textContent = 'Submitting...';
+    messageEl.textContent = ''; // Clear any previous messages
     
     try {
       // Add score to Firestore
@@ -78,13 +103,15 @@ export class Leaderboard {
       // Store the username in localStorage for future submissions
       localStorage.setItem('ultrametricUsername', username);
       
-      // Load the leaderboard after submitting
-      this.openLeaderboard();
+      // Refresh the live leaderboard
+      this.loadLiveLeaderboard();
       
     } catch (error) {
       console.error('Error submitting score:', error);
       messageEl.textContent = 'Error submitting score. Please try again.';
       messageEl.style.color = '#f44336';
+    } finally {
+      // Always reset the button state regardless of success/failure
       submitBtn.disabled = false;
       submitBtn.textContent = 'Submit Score';
     }
@@ -101,49 +128,77 @@ export class Leaderboard {
         .limit(100)
         .get();
       
-      if (snapshot.empty) {
-        tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center">No scores submitted yet!</td></tr>';
-        return;
-      }
-      
-      // Clear the loading message
-      tableBody.innerHTML = '';
-      
-      // Get current user's name
-      const currentUser = localStorage.getItem('ultrametricUsername') || '';
-      
-      // Populate leaderboard
-      let rank = 1;
-      snapshot.forEach(doc => {
-        const data = doc.data();
-        const row = document.createElement('tr');
-        
-        // Highlight current user's score
-        if (data.username === currentUser && currentUser !== 'Anonymous' && currentUser !== '') {
-          row.classList.add('user-score');
-        }
-        
-        // Format date
-        const date = data.dateSubmitted ? new Date(data.dateSubmitted.toDate()) : new Date();
-        const formattedDate = date.toLocaleDateString();
-        
-        row.innerHTML = `
-          <td>${rank}</td>
-          <td>${data.username}</td>
-          <td>${data.relativeScore}</td>
-          <td>${data.depth}</td>
-          <td>${data.width}</td>
-          <td>${formattedDate}</td>
-        `;
-        
-        tableBody.appendChild(row);
-        rank++;
-      });
+      this.populateLeaderboard(snapshot, tableBody);
       
     } catch (error) {
       console.error('Error loading leaderboard:', error);
       tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center">Error loading leaderboard data. Please try again.</td></tr>';
     }
+  }
+  
+  async loadLiveLeaderboard() {
+    const tableBody = document.getElementById('live-leaderboard-body');
+    tableBody.innerHTML = '<tr><td colspan="6" class="loading-message">Loading leaderboard data...</td></tr>';
+    
+    try {
+      // Get top 100 scores ordered by relative score (ascending = better)
+      const snapshot = await this.leaderboardCollection
+        .orderBy('relativeScore', 'asc')
+        .limit(100)
+        .get();
+      
+      this.populateLeaderboard(snapshot, tableBody);
+      
+      // Update "last updated" timestamp
+      const now = new Date();
+      const timeString = now.toLocaleTimeString();
+      document.getElementById('last-updated').textContent = `Last updated: ${timeString}`;
+      
+    } catch (error) {
+      console.error('Error loading live leaderboard:', error);
+      tableBody.innerHTML = '<tr><td colspan="6" class="loading-message">Error loading leaderboard data. Please try again.</td></tr>';
+    }
+  }
+  
+  populateLeaderboard(snapshot, tableBody) {
+    if (snapshot.empty) {
+      tableBody.innerHTML = '<tr><td colspan="6" class="loading-message">No scores submitted yet!</td></tr>';
+      return;
+    }
+    
+    // Clear the table
+    tableBody.innerHTML = '';
+    
+    // Get current user's name
+    const currentUser = localStorage.getItem('ultrametricUsername') || '';
+    
+    // Populate leaderboard
+    let rank = 1;
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      const row = document.createElement('tr');
+      
+      // Highlight current user's score
+      if (data.username === currentUser && currentUser !== 'Anonymous' && currentUser !== '') {
+        row.classList.add('user-score');
+      }
+      
+      // Format date
+      const date = data.dateSubmitted ? new Date(data.dateSubmitted.toDate()) : new Date();
+      const formattedDate = date.toLocaleDateString();
+      
+      row.innerHTML = `
+        <td>${rank}</td>
+        <td>${data.username}</td>
+        <td>${data.relativeScore}</td>
+        <td>${data.depth}</td>
+        <td>${data.width}</td>
+        <td>${formattedDate}</td>
+      `;
+      
+      tableBody.appendChild(row);
+      rank++;
+    });
   }
   
   // Auto-fill username if previously saved
@@ -153,4 +208,18 @@ export class Leaderboard {
       document.getElementById('username-input').value = savedUsername;
     }
   }
-} 
+  
+  // Clean up when page unloads
+  destroy() {
+    if (this.refreshInterval) {
+      clearInterval(this.refreshInterval);
+    }
+  }
+}
+
+// Add window unload handler to clean up the refresh interval
+window.addEventListener('beforeunload', () => {
+  if (window.leaderboard && typeof window.leaderboard.destroy === 'function') {
+    window.leaderboard.destroy();
+  }
+}); 

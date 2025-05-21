@@ -36,7 +36,7 @@ renderVersionLog();
 let state, ui;
 let agentNode, currentLayer, cost, busy, playing=false;
 let moveNumber = 0;
-let leaderboard = new Leaderboard(config);
+window.leaderboard = new Leaderboard(config);
 
 /* ── wire Generate button ─────────────────────────────────── */
 genBtn.onclick = () => startNewGame(+widthSlider.value, +depthSlider.value);
@@ -72,7 +72,7 @@ function startNewGame(W, D) {
   document.getElementById("depthDisplay").textContent = D;
 
   // Initialize stat displays
-  currentDepthEl.textContent = "-1";
+  currentDepthEl.textContent = "0";
   gameCostEl.textContent = "0";
   costHistoryEl.innerHTML = "";
   moveNumber = 0;
@@ -124,7 +124,7 @@ function endGame() {
   document.getElementById("final-cost").textContent = cost;
   
   // Auto-fill username from previous submissions if available
-  leaderboard.autoFillUsername();
+  window.leaderboard.autoFillUsername();
   
   // Display the overlay
   const overlay = document.getElementById("overlay");
@@ -156,6 +156,12 @@ function updateRules() {
     <p>In a tree, every pair of nodes has a unique common ancestor. The path between two nodes goes up to this common ancestor, then down to the destination. Careful planning of your moves will help minimize your total cost.</p>
     
     <div id="depthNote">Current tree depth: <span id="depthDisplay">15</span></div>
+    
+    <div class="score-explanation">
+      <h3>Leaderboard Score</h3>
+      <p>Your leaderboard score is calculated as: <strong>Cost ÷ Depth ÷ log(Width)</strong></p>
+      <p>Lower scores are better! This formula allows fair comparison between games with different depths and widths.</p>
+    </div>
   `;
 }
 
@@ -204,7 +210,7 @@ function restartGame() {
   
   // Reset display values
   costEl.textContent = "0";
-  currentDepthEl.textContent = "-1";
+  currentDepthEl.textContent = "0";
   gameCostEl.textContent = "0";
   costHistoryEl.innerHTML = "";
   moveNumber = 0;
