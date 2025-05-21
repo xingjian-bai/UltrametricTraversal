@@ -98,10 +98,13 @@ export class Leaderboard {
     const submitBtn = document.getElementById('submit-score');
     const messageEl = document.getElementById('submission-message');
     
-    // Get current game stats
+    // IMPORTANT FIX: Get the CURRENT depth and width values, not from initial config
     const cost = parseInt(document.getElementById('final-cost').textContent);
-    const depth = this.gameConfig.DEPTH;
-    const width = this.gameConfig.WIDTH;
+    
+    // Get depth and width from the current game configuration
+    // NOT from the stored this.gameConfig which might be outdated
+    const depth = parseInt(document.getElementById('depthVal').textContent);
+    const width = parseInt(document.getElementById('widthVal').textContent);
     
     // Calculate relative score
     const relativeScore = this.calculateRelativeScore(cost, depth, width);
@@ -112,7 +115,7 @@ export class Leaderboard {
     messageEl.textContent = ''; // Clear any previous messages
     
     try {
-      // Add score to Firestore
+      // Add score to Firestore with the CURRENT game dimensions
       await this.leaderboardCollection.add({
         username: username,
         cost: cost,
@@ -267,6 +270,10 @@ export class Leaderboard {
     if (this.refreshInterval) {
       clearInterval(this.refreshInterval);
     }
+  }
+
+  updateGameConfig(newConfig) {
+    this.gameConfig = newConfig;
   }
 }
 

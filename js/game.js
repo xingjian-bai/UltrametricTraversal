@@ -76,6 +76,14 @@ function startNewGame(W, D) {
   gameCostEl.textContent = "0";
   costHistoryEl.innerHTML = "";
   moveNumber = 0;
+
+  // Add this to update the leaderboard with current config:
+  if (window.leaderboard) {
+    window.leaderboard.updateGameConfig({
+      DEPTH: parseInt(document.getElementById('depthVal').textContent),
+      WIDTH: parseInt(document.getElementById('widthVal').textContent)
+    });
+  }
 }
 
 /* ── attach click behaviour to current layer nodes ───────── */
@@ -123,21 +131,32 @@ function endGame() {
   // Set final cost in overlay
   document.getElementById("final-cost").textContent = cost;
   
-  // Calculate and display the relative score
-  const relativeScore = (cost / config.DEPTH / Math.log(config.WIDTH)).toFixed(2);
+  // Get current configurations, not the initial ones
+  const currentDepth = parseInt(document.getElementById('depthVal').textContent);
+  const currentWidth = parseInt(document.getElementById('widthVal').textContent);
+  
+  // Calculate and display the relative score with CURRENT depth/width
+  const relativeScore = (cost / currentDepth / Math.log(currentWidth)).toFixed(2);
   const finalScoreEl = document.getElementById('final-score');
   if (finalScoreEl) {
     finalScoreEl.textContent = relativeScore;
   }
   
-  // Auto-fill username from localStorage if available
+  // Update leaderboard filters to match current game
+  document.getElementById('leaderboardDepthSlider').value = currentDepth;
+  document.getElementById('leaderboardDepthVal').textContent = currentDepth;
+  document.getElementById('leaderboardWidthSlider').value = currentWidth;
+  document.getElementById('leaderboardWidthVal').textContent = currentWidth;
+  
+  // Make sure leaderboard knows current dimensions
   if (window.leaderboard) {
+    window.leaderboard.currentFilterDepth = currentDepth;
+    window.leaderboard.currentFilterWidth = currentWidth;
     window.leaderboard.autoFillUsername();
   }
   
-  // Display the overlay
-  const overlay = document.getElementById("overlay");
-  overlay.style.display = "flex";
+  // Show the overlay
+  document.getElementById('overlay').style.display = 'flex';
   
   // Wire up the restart button in the overlay
   document.getElementById("restart-btn").onclick = () => {
