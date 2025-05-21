@@ -16,7 +16,7 @@ const depthSlider = document.getElementById("depthSlider");
 const widthSlider = document.getElementById("widthSlider");
 const depthVal    = document.getElementById("depthVal");
 const widthVal    = document.getElementById("widthVal");
-const genBtn      = document.getElementById("generateBtn");
+const genBtn      = document.getElementById("generate-btn");
 const debugEl     = document.getElementById("debug");
 const verHistEl   = document.getElementById("versionHistory");
 const currentDepthEl = document.getElementById("current-depth");
@@ -54,6 +54,10 @@ function startNewGame(W, D) {
   /* lock controls */
   genBtn.disabled = depthSlider.disabled = widthSlider.disabled = true;
 
+  /* CRITICAL FIX: Properly clear the previous game from canvas */
+  // Clear any existing nodes and edges
+  d3.select('#canvas').selectAll('*').remove();
+  
   /* fresh tree + UI */
   state = new GameState(W, D);
   ui    = new UI(svgEl, state);
@@ -140,8 +144,9 @@ function endGame() {
   const currentDepth = parseInt(document.getElementById('depthVal').textContent);
   const currentWidth = parseInt(document.getElementById('widthVal').textContent);
   
-  // Calculate and display the relative score with CURRENT depth/width
-  const relativeScore = (cost / currentDepth).toFixed(2);
+  // FIXED: Calculate and display the relative score with CURRENT depth
+  // Ensure we're doing floating point division, not integer division
+  const relativeScore = (parseFloat(cost) / parseFloat(currentDepth)).toFixed(2);
   const finalScoreEl = document.getElementById('final-score');
   if (finalScoreEl) {
     finalScoreEl.textContent = relativeScore;
@@ -274,10 +279,10 @@ function restartGame() {
   appendDebug("Game restarted. Click 'Generate' to start a new game.");
 }
 
-// Additional fix for the restart bug to ensure correct depth/width are saved
-let CONFIG = {
-  WIDTH: 5,
-  DEPTH: 12
+/* ───── initialization ───────────────────────────────────── */
+const CONFIG = {
+  WIDTH: 6,  // Default width updated to 6
+  DEPTH: 10  // Default depth updated to 10
 };
 
 function updateConfig() {

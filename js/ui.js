@@ -45,12 +45,14 @@ export class UI {
     this.nodeMap = new Map();
     this._layoutDone = false;
 
-    // Adjust node sizes for mobile
-    this.nodeSizeFactor = window.innerWidth <= 768 ? 2.0 : 1.0;
+    // Improved mobile detection
+    this.isMobile = this.detectMobile();
+    this.nodeSizeFactor = this.isMobile ? 2.0 : 1.0;
     
-    // Recalculate on window resize
+    // Listen for orientation changes and window resizes
     window.addEventListener('resize', () => {
-      this.nodeSizeFactor = window.innerWidth <= 768 ? 2.0 : 1.0;
+      this.isMobile = this.detectMobile();
+      this.nodeSizeFactor = this.isMobile ? 2.0 : 1.0;
       if (this.state) {
         this.render(this.currentLayer, this.currentNode);
       }
@@ -178,5 +180,26 @@ export class UI {
     if (d.data.depth < visibleDepth) return "yellow";
     if (d.data.depth === visibleDepth) return "blue";
     return "none";
+  }
+
+  // Robust mobile detection function
+  detectMobile() {
+    // Check multiple properties for reliable detection
+    return (
+      // Check for touch capability
+      ('ontouchstart' in window || navigator.maxTouchPoints > 0) &&
+      // Check screen size - typically phones are under 768px wide
+      (window.innerWidth <= 768 || window.screen.width <= 768)
+    );
+  }
+
+  // When drawing nodes, use the size factor
+  drawNodes() {
+    // Wherever you calculate node radius
+    const baseNodeRadius = 12; // Or whatever your base value is
+    const nodeRadius = baseNodeRadius * this.nodeSizeFactor;
+    
+    // Use nodeRadius in your D3 rendering
+    // ...
   }
 }

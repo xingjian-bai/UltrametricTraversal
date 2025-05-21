@@ -88,7 +88,9 @@ export class Leaderboard {
   }
 
   calculateRelativeScore(cost, depth, width) {
-    return (cost / depth).toFixed(2);
+    // Fix: Explicitly parse as floats and force 2 decimal places
+    const score = parseFloat(cost) / parseFloat(depth);
+    return score.toFixed(2);
   }
 
   async submitScore() {

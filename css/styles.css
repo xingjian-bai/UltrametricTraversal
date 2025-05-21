@@ -829,4 +829,48 @@ input[type="text"], input[type="number"] {
   }
 }
 
+/* Improved mobile detection that works across devices */
+@media only screen and (max-width: 768px), 
+       only screen and (max-device-width: 768px),
+       only screen and (hover: none) and (pointer: coarse) {
+  
+  /* Node and edge styling for mobile */
+  .node {
+    r: 24px !important; /* Force larger node radius */
+  }
+  
+  /* Larger touch targets */
+  .button {
+    padding: 16px 28px;
+    font-size: 22px;
+    min-width: 180px;
+    margin: 15px;
+    border-radius: 12px;
+  }
+  
+  /* Ensure sliders are easy to use */
+  input[type="range"] {
+    height: 36px;
+    min-width: 200px;
+    margin: 20px 0;
+  }
+  
+  /* Make sure text is very readable */
+  body {
+    font-size: 20px;
+  }
+  
+  h1, h2, h3 {
+    line-height: 1.3;
+  }
+  
+  /* Improve form controls */
+  input[type="text"] {
+    font-size: 20px;
+    padding: 15px 20px;
+    margin: 15px 0;
+    border-radius: 8px;
+  }
+}
+
 /* Add JavaScript to adjust D3 node sizes on mobile */
